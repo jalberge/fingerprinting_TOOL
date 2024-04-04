@@ -90,9 +90,9 @@ def fingerprint(
         "bai_or_crai": bai_or_crai,
         "sample_id": sample_id,
         "haplotype_db": ref_files["haplotype_db"],
-        "ref_fa": ref_files["haplotype_db"],
-        "ref_fai": ref_files["haplotype_db"],
-        "ref_dict": ref_files["haplotype_db"]
+        "ref_fa": ref_files["ref_fa"],
+        "ref_fai": ref_files["ref_fai"],
+        "ref_dict": ref_files["ref_dict"]
     })
 
     crosschecked_fingerprints = CrosscheckFingerprints(inputs={
