@@ -32,7 +32,7 @@ export GCS_OAUTH_TOKEN=$(gcloud auth application-default print-access-token)
 grep -E -v "^[@#]" "${haplotype_db}" | awk -v OFS='\t' '{print $1,$2-1,$2}' > bed
 
 # create mini bam
-samtools view -h -f 1 -F 1024 -o tmp.bam -q 30 -M -L bed -X "${bam}" "${bai}"
+samtools view -h -f 1 -F 1024 -o tmp.bam -q 30 -M -L bed -X "${bam_or_cram}" "${bai_or_crai}"
 samtools index tmp.bam
 
 # extract fingerprints
