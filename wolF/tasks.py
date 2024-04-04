@@ -29,7 +29,7 @@ class ExtractFingerprints(wolf.Task):
       INPUT=${bam_or_cram} \
       OUTPUT=${sample_id}.fingerprinted.vcf \
       HAPLOTYPE_MAP=${haplotype_db} \
-      REFERENCE_SEQUENCE=${ref_fasta}
+      REFERENCE_SEQUENCE=${ref_fa}
     """
     outputs = {
         "fingerprint_vcf": "*.fingerprinted.vcf"
