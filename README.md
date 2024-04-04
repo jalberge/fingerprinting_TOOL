@@ -1,6 +1,6 @@
 # Fingerprinting tool
 
-This leverages GATK's `ExtractFingerprints` and `CrosscheckFingerprints` on a terra sample_set
+wolF tasks to fingerprint many samples and compare them in a pairwise manner. This leverages GATK's `ExtractFingerprints` and `CrosscheckFingerprints` on a terra sample_set, similar to the `CrossCheckLaneFingerprints` [https://github.com/getzlab/picard_TOOL/blob/6ca4f895f0ddd72c9bdcaebc706b1e4d4a2d8967/wolF/tasks.py](task).
 
 ## Current version
 
