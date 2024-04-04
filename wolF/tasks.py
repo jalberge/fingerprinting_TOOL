@@ -23,7 +23,6 @@ class CloudExtractFingerprints(wolf.Task):
     }
 
     script = """
-set -euxo pipefail
 
 # samtools requires auth token
 export GCS_OAUTH_TOKEN=$(gcloud auth application-default print-access-token)
