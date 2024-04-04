@@ -9,6 +9,7 @@ v0.0.1
 Not working / not tested: 
 
 - upload to bucket
+- multi-lane experiments
 - sync to terra
 - sample_set instead of table of samples
 - GDC/NCI bams
