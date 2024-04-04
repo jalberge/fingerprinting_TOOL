@@ -21,7 +21,10 @@ I copied the code within the cloud task to allow `rm` minibam after extractfinge
 
 ## Performance
 
-Tested on 150 WGS available in Google cloud without localization, on 933 SNPs from haplotype_db (`gs://getzlab-workflows-reference_files-oa/hg38/Homo_sapiens_assembly38.haplotype_database.txt`).
+Tested on:
+150 WGS available in Google cloud without localization
+933 SNPs from haplotype_db (default)
+--> 15 min
 
 ## Default values:
 
