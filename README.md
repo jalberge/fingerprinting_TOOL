@@ -50,7 +50,7 @@ def terra_na(x):
     y = ( pd.isna(x) ) | ( x=="")
     return y
 
-fingerprinting_workflows = wolf.ImportTask("git@github.com:jalberge/fingerprinting_TOOL.git", commit="2c3d24fb", branch="master")
+fingerprinting_workflows = wolf.ImportTask("git@github.com:jalberge/fingerprinting_TOOL.git", commit="8b74da9d", branch="master")
 
 # extract samples from a terra workspace
 WORKSPACE = "<project/workspace>"
