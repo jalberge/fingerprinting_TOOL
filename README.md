@@ -22,9 +22,10 @@ I copied the code within the cloud task to allow `rm` minibam after extractfinge
 ## Performance
 
 Tested on:
-150 WGS available in Google cloud without localization
-933 SNPs from haplotype_db (default)
---> 15 min
+
+- 150 WGS available in Google cloud without localization
+- 933 SNPs from haplotype_db (default)
+- *<15 min*
 
 ## Default values:
 
