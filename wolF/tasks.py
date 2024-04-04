@@ -78,6 +78,7 @@ def fingerprint(
         ref_fa="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
         ref_fai="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai",
         ref_dict="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict",
+        gatk_path="gatk",
         workspace=None,
         bucket=None):
     ref_files = wolf.LocalizeToDisk(files={
@@ -94,13 +95,15 @@ def fingerprint(
         "haplotype_db": ref_files["haplotype_db"],
         "ref_fa": ref_files["ref_fa"],
         "ref_fai": ref_files["ref_fai"],
-        "ref_dict": ref_files["ref_dict"]
+        "ref_dict": ref_files["ref_dict"],
+        "gatk_path": gatk_path
     })
 
     crosschecked_fingerprints = CrosscheckFingerprints(inputs={
         "input_vcfs": [fingerprints["fingerprint_vcf"]],
         "sample_set_id": sample_set_id,
         "haplotype_db": ref_files["haplotype_db"],
+        "gatk_path": gatk_path
     })
 
     if bucket is not None:
