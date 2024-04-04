@@ -68,4 +68,44 @@ with wolf.Workflow(workflow=fingerprinting_workflows.fingerprint) as w:
         )
 ```
 
+## Quick overview in R
+
+For ComplexHeatmap, and tsv export.
+
+```{R}
+library(ComplexHeatmap)
+library(circlize)
+
+
+clean.name <- function(x, single_lib=TRUE, colnames=FALSE, chr="/") {
+  if(colnames) chr='\\.'
+  y = str_split(x, chr)[[1]]
+  z = y[length(y)]
+  zz = str_remove_all(z, ".fingerprinted.vcf")
+  if(single_lib & str_detect(zz, "::")) {
+    str_split(zz, '::')[[1]][-1]
+  } else
+    zz
+}
+
+mtx <- as.matrix(read.table("fingerprints/FINGERPRINTING_TEST.matrix", header = TRUE, row.names = 1))
+
+rownames(mtx) <- sapply(rownames(mtx), clean.name, simplify = TRUE, USE.NAMES = FALSE)
+colnames(mtx) <- sapply(colnames(mtx), clean.name, colnames = TRUE, simplify = TRUE, USE.NAMES = FALSE)
+
+col_fun = colorRamp2(c(0, 50), c("white", "black"))
+
+plot <- Heatmap(mtx, show_column_names = FALSE, col = col_fun, name = "-5<LOD<5", row_names_gp = gpar(fontsize = 3))
+
+pdf("fingerprints/fingerprint_20240404_genomesphere.pdf")
+draw(plot)
+dev.off()
+
+as.data.frame(mtx) |> 
+  tibble::rownames_to_column("ID1") |>
+  pivot_longer(-ID1, names_to = "ID2", values_to = "LOD") |>
+  arrange(-LOD) |>
+  write_tsv("fingerprints/fingerprint_test_lods.tsv")
+```
+
 
