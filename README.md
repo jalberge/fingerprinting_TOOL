@@ -9,7 +9,7 @@ v0.0.1
 Not working / not tested: 
 
 - upload to bucket
-- multi-lane/RG bams (GP deliveries are multi lane, so this is an important feature)
+- multi-lane/RG bams (GP deliveries are across lane/sequencers, so this is an important feature)
 - sync to terra
 - sample_set instead of table of samples
 - GDC/NCI bams
