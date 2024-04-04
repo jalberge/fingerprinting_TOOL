@@ -1,6 +1,6 @@
 import wolf
 
-GATK_DOCKER = "broadinstitute/gatk:4.2.0.0"
+GATK_DOCKER = "gcr.io/broad-getzlab-workflows/gatk4_wolf:v6"
 
 
 class ExtractFingerprints(wolf.Task):
