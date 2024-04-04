@@ -98,7 +98,7 @@ col_fun = colorRamp2(c(0, 50), c("white", "black"))
 
 plot <- Heatmap(mtx, show_column_names = FALSE, col = col_fun, name = "-5<LOD<5", row_names_gp = gpar(fontsize = 3))
 
-pdf("fingerprints/fingerprint_20240404_genomesphere.pdf")
+pdf("fingerprints/fingerprint_test.pdf")
 draw(plot)
 dev.off()
 
