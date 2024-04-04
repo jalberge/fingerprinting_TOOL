@@ -1,6 +1,59 @@
 import wolf
 
+# for cloud usage we require samtools
 GATK_DOCKER = "gcr.io/broad-getzlab-workflows/gatk4_wolf:v6"
+
+
+class CloudExtractFingerprints(wolf.Task):
+    name = "cloud_extract_fingerprints"
+    inputs = {
+        "sample_id": None,
+        "bam_or_cram": None,  # set to None for required arguments
+        "bai_or_crai": "",
+        "haplotype_db": None,
+        "ref_fa": None,
+        "ref_fai": None,
+        "ref_dict": None,
+        "gatk_path": "/gatk/gatk"
+    }
+    # by default, stream sequence data with gatk
+    overrides = {
+        "bam_or_cram": "string",
+        "bai_or_crai": "string"
+    }
+
+    script = """
+set -euxo pipefail
+
+# samtools requires auth token
+export GCS_OAUTH_TOKEN=$(gcloud auth application-default print-access-token)
+    
+# transform haplotype db to bed intervals
+grep -E -v "^[@#]" "${haplotype_db}" | awk -v OFS='\t' '{print $1,$2-1,$2}' > bed
+
+# create mini bam
+samtools view -h -f 1 -F 1024 -o tmp.bam -q 30 -M -L bed -X "${bam}" "${bai}"
+samtools index tmp.bam
+
+# extract fingerprints
+
+# we could directly use CrosscheckFingerprints, but this way we store the vcf for later use.
+${gatk_path} --java-options "-Xms3G" \
+  ExtractFingerprint \
+  INPUT=tmp.bam \
+  OUTPUT=${sample_id}.fingerprinted.vcf \
+  HAPLOTYPE_MAP=${haplotype_db} \
+  REFERENCE_SEQUENCE=${ref_fa}
+  
+rm bed
+rm tmp.bam
+
+    """
+    outputs = {
+        "fingerprint_vcf": "*.fingerprinted.vcf"
+    }
+    docker = GATK_DOCKER
+    resources = {"mem": "4G"}
 
 
 class ExtractFingerprints(wolf.Task):
@@ -74,6 +127,7 @@ def fingerprint(
         bai_or_crai=None,
         sample_id=None,
         sample_set_id=None,
+        stream_bam_or_cram=True,
         haplotype_db="gs://getzlab-workflows-reference_files-oa/hg38/Homo_sapiens_assembly38.haplotype_database.txt",
         ref_fa="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
         ref_fai="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai",
@@ -88,16 +142,29 @@ def fingerprint(
         "ref_dict": ref_dict
     })
 
-    fingerprints = ExtractFingerprints(inputs={
-        "bam_or_cram": bam_or_cram,
-        "bai_or_crai": bai_or_crai,
-        "sample_id": sample_id,
-        "haplotype_db": ref_files["haplotype_db"],
-        "ref_fa": ref_files["ref_fa"],
-        "ref_fai": ref_files["ref_fai"],
-        "ref_dict": ref_files["ref_dict"],
-        "gatk_path": gatk_path
-    })
+    if stream_bam_or_cram:
+        fingerprints = CloudExtractFingerprints(inputs={
+            "bam_or_cram": bam_or_cram,
+            "bai_or_crai": bai_or_crai,
+            "sample_id": sample_id,
+            "haplotype_db": ref_files["haplotype_db"],
+            "ref_fa": ref_files["ref_fa"],
+            "ref_fai": ref_files["ref_fai"],
+            "ref_dict": ref_files["ref_dict"],
+            "gatk_path": gatk_path
+        })
+    else:
+        fingerprints = ExtractFingerprints(inputs={
+            "bam_or_cram": bam_or_cram,
+            "bai_or_crai": bai_or_crai,
+            "sample_id": sample_id,
+            "stream_bam_or_cram": stream_bam_or_cram,
+            "haplotype_db": ref_files["haplotype_db"],
+            "ref_fa": ref_files["ref_fa"],
+            "ref_fai": ref_files["ref_fai"],
+            "ref_dict": ref_files["ref_dict"],
+            "gatk_path": gatk_path
+        })
 
     crosschecked_fingerprints = CrosscheckFingerprints(inputs={
         "input_vcfs": [fingerprints["fingerprint_vcf"]],
