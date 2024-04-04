@@ -1,6 +1,6 @@
 # Fingerprinting tool
 
-This leverages `ExtractFingerprints` and `CrosscheckFingerprints` on a terra sample_set
+This leverages GATK's `ExtractFingerprints` and `CrosscheckFingerprints` on a terra sample_set
 
 ## Current version
 
