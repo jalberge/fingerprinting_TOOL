@@ -22,6 +22,8 @@ class ExtractFingerprints(wolf.Task):
     }
 
     script = """
+    export GCS_OAUTH_TOKEN=$(gcloud auth application-default print-access-token)
+    
     set -euxo pipefail
     # we could directly use CrosscheckFingerprints, but this way we store the vcf for later use.
     ${gatk_path} --java-options "-Xms3G" \
