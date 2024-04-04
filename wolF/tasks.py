@@ -45,8 +45,7 @@ ${gatk_path} --java-options "-Xms3G" \
   HAPLOTYPE_MAP=${haplotype_db} \
   REFERENCE_SEQUENCE=${ref_fa}
   
-rm bed
-rm tmp.bam
+rm bed tmp.ba*
 
     """
     outputs = {
