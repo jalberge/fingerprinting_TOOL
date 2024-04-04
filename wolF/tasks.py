@@ -105,7 +105,7 @@ class CrosscheckFingerprints(wolf.Task):
     ${gatk_path} --java-options "-Xms3G" \
         CrosscheckFingerprints \
         I=${input_vcfs} \
-        HAPLOTYPE_MAP=~{haplotype_db} \
+        HAPLOTYPE_MAP=${haplotype_db} \
         LOD_THRESHOLD=-5 \
         CROSSCHECK_MODE=CHECK_ALL_OTHERS \
         CROSSCHECK_BY=FILE \
