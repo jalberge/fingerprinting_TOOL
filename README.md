@@ -1,65 +1,34 @@
-A template for tool repositories. It includes the bare necessities to build and deploy your tool:
+# Fingerprinting tool
 
-* `Dockerfile`, the build steps for containerizing the tool.
-* A deploy script (`deploy.sh`), which automatically versions and uploads your Docker image to the container repository.
-* A wolF task template (`wolf/tasks.py`). This repo doubles as a Python package; importing it will automatically import
-  all of the task functions defined in `tasks.py`
+This leverages `ExtractFingerprints` and `CrosscheckFingerprints` on a terra sample_set
 
-## Dockerfile
+## Current version
 
-The Dockerfile template uses the Getz Lab standard base image as the container's base image.
-Unless you have very specific reasons to use a different image, this should not be changed.
-It both ensures a consistent environment across the lab's containers, and speeds up pulling/pushing
-images, since the base image is cached on all wolF worker nodes, the lab standard VM image, and the
-container repo.
+v0.0.1
 
-The Dockerfile template requires you to fill in build steps, and optionally copy any external scripts into the
-`/app` directory.
+Not working / not tested: 
 
-## Deploy script
+- upload to bucket
+- sync to terra
+- sample_set instead of table of samples
+- GDC/NCI bams
+- LocalizeToDisk (only stream or local for now)
+- scRNA (probably change haplotypeDB)
+- hg19 / non human
+- Heatmap and tsv export of results
 
-This script (`deploy.sh`) will build, automatically tag/version, and upload your Docker image to the container registry.
-The version is automatically determined by the number of commits to the tool repo. If you are on a branch
-other than master, the branch name will automatically be prepended to the version number. This is to distinguish
-alternate tool versions or configurations that are not intended to supersede existing versions of the tool.
+I copied the code within the cloud task to allow `rm` minibam after extractfingerprints.
 
-## wolF task template
+## Performance
 
-wolF tasks wrapping your tool should be defined in `wolF/tasks.py`. This repo doubles as a Python package, with all
-functions/tasks defined in `tasks.py` automatically available for import. To include them in wolF workflows, use the
-built-in wolF import functionality:
+Tested on 150 WGS available in Google cloud without localization, on 933 SNPs from haplotype_db (`gs://getzlab-workflows-reference_files-oa/hg38/Homo_sapiens_assembly38.haplotype_database.txt`).
 
-```python
-my_task = wolf.ImportTask(
-  "/path/to/tool/on/disk", # can also be a path to a GitHub repo, e.g. git@github.com:getzlab/my_cool_TOOL.git
-  commit = <commit hash or tag> # optional, but highly recommended — will otherwise automatically pull latest version!
-)
+## Default values:
+
 ```
-
-Any tasks defined in `task.py` will be available in the `my_task` object. For example, if there is a task called `task1`, you would access it like so in a workflow:
-
-```python
-task_1 = my_task.task1(
-  inputs = {
-     "input_1" : "hello"
-  }
-)
+stream_bam_or_cram=True
+haplotype_db="gs://getzlab-workflows-reference_files-oa/hg38/Homo_sapiens_assembly38.haplotype_database.txt"
+ref_fa="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta"
+ref_fai="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
+ref_dict="gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict"
 ```
-
-If your repo only exports a single task, you can save some typing by specifying the `main_task` parameter:
-
-```python
-my_task = wolf.ImportTask(
-  "git@github.com:getzlab/my_cool_TOOL.git",
-  commit = "abc1234",
-  main_task = "task1"
-)
-
-task_1 = my_task(
-  inputs = {
-     "input_1" : "hello"
-  }
-)
-```
-
-Now the `my_task` object points directly to the underlying task `task1`.
