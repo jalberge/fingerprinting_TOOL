@@ -91,6 +91,35 @@ class ExtractFingerprints(wolf.Task):
     resources = {"mem": "4G"}
 
 
+class CreateFingerprintsDb(wolf.Task):
+    name = "create_fingerprints_db"
+    inputs = {
+        "input_vcfs": None,
+        "sample_set_id": "my_db",
+    }
+    script = """
+mkdir tmp
+
+# gzip index and merge
+cat $input_vcfs | while read r
+do 
+    s=$(basename $r)
+    bcftools view -Oz -o "tmp/${s}.gz" $r
+    tabix -p vcf "tmp/${s}.gz"
+done
+ls tmp/*.vcf.gz > vcf_gz
+bcftools merge -l vcf_gz | bcftools view -Oz -o ${sample_set_id}.fingerprints.vcf.gz
+rm -r tmp
+tabix -p vcf ${sample_set_id}.fingerprints.vcf.gz
+    """
+    outputs = {
+        "fingerprints_vcf_gz": "*.fingerprints.vcf.gz",
+        "fingerprints_vcf_gz_tbi": "*.fingerprints.vcf.gz.tbi"
+    }
+    docker = GATK_DOCKER
+    resources = {"mem": "4G"}
+
+
 class CrosscheckFingerprints(wolf.Task):
     name = "crosscheck_fingerprints"
     inputs = {
@@ -100,7 +129,8 @@ class CrosscheckFingerprints(wolf.Task):
         "gatk_path": "/gatk/gatk"
     }
     script = """
-    # does gatk accept lists of files? doc says yes https://gatk.broadinstitute.org/hc/en-us/articles/360037594711-CrosscheckFingerprints-Picard#--INPUT
+    # does gatk accept lists of files? doc says 
+    # yes https://gatk.broadinstitute.org/hc/en-us/articles/360037594711-CrosscheckFingerprints-Picard#--INPUT
     ${gatk_path} --java-options "-Xms3G" \
         CrosscheckFingerprints \
         I=${input_vcfs} \
@@ -171,12 +201,19 @@ def fingerprint(
         "gatk_path": gatk_path
     })
 
+    fingerprints_db = CreateFingerprintsDb(inputs={
+        "input_vcfs": [fingerprints["fingerprint_vcf"]],
+        "sample_set_id": sample_set_id
+    })
+
     if bucket is not None:
         upload_vcf = wolf.UploadToBucket(
             files=[
                 fingerprints["fingerprint_vcf"],
                 crosschecked_fingerprints["crosscheck_matrix"],
-                crosschecked_fingerprints["crosscheck_metrics"]
+                crosschecked_fingerprints["crosscheck_metrics"],
+                fingerprints_db["fingerprints_vcf_gz"],
+                fingerprints_db["fingerprints_vcf_gz_tbi"],
             ],
             bucket=bucket
         )
@@ -184,7 +221,9 @@ def fingerprint(
     if workspace:
         upload_dict = {
             'crosschecked_fingerprints_matrix': crosschecked_fingerprints["crosscheck_matrix"],
-            'crosschecked_fingerprints_metrics': crosschecked_fingerprints["crosscheck_metrics"]
+            'crosschecked_fingerprints_metrics': crosschecked_fingerprints["crosscheck_metrics"],
+            'fingerprints_vcf_gz': fingerprints_db["fingerprints_vcf_gz"],
+            'fingerprints_vcf_gz_tbi': fingerprints_db["fingerprints_vcf_gz_tbi"]
         }
         sync_run = wolf.SyncToWorkspace(
             nameworkspace=workspace,
