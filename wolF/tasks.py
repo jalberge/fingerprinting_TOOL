@@ -51,7 +51,7 @@ rm bed tmp.ba*
         "fingerprint_vcf": "*.fingerprinted.vcf"
     }
     docker = GATK_DOCKER
-    resources = {"mem": "4G"}
+    resources = {"mem": "12G"}
 
 
 class ExtractFingerprints(wolf.Task):
