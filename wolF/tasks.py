@@ -34,17 +34,28 @@ grep -E -v "^[@#]" "${haplotype_db}" | awk -v OFS='\t' '{print $1,$2-1,$2}' > be
 samtools view -h -f 1 -F 1024 -o tmp.bam -q 30 -M -L bed -X "${bam_or_cram}" "${bai_or_crai}"
 samtools index tmp.bam
 
+# reheader because sample merge mess up everything (probably bad idea for general use case, but useful in my case)
+${gatk_path} AddOrReplaceReadGroups \
+       I=tmp.bam \
+       O=output.bam \
+       RGID=$sample_id \
+       RGLB=$sample_id \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=$sample_id \
+       CREATE_INDEX=true
+
 # extract fingerprints
 
 # we could directly use CrosscheckFingerprints, but this way we store the vcf for later use.
 ${gatk_path} --java-options "-Xms3G" \
   ExtractFingerprint \
-  INPUT=tmp.bam \
+  INPUT=output.bam \
   OUTPUT=${sample_id}.fingerprinted.vcf \
   HAPLOTYPE_MAP=${haplotype_db} \
   REFERENCE_SEQUENCE=${ref_fa}
   
-rm bed tmp.ba*
+rm bed tmp.ba* output.bam
 
     """
     outputs = {
