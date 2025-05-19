@@ -236,7 +236,7 @@ def fingerprint(
             'fingerprints_vcf_gz': fingerprints_db["fingerprints_vcf_gz"],
             'fingerprints_vcf_gz_tbi': fingerprints_db["fingerprints_vcf_gz_tbi"]
         }
-        sync_run = wolf.SyncToWorkspace(
+        sync_run = wolf.fc.SyncToWorkspace(
             nameworkspace=workspace,
             entity_type="sample_set",
             entity_name=sample_set_id,
